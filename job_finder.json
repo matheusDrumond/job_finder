@@ -1,0 +1,331 @@
+{
+    "name": "Job Finder",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "triggerAtHour": 9
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.3,
+            "position": [-256, 752],
+            "id": "f9862ffa-179b-4c2b-8ddb-a95b7ab9e31e",
+            "name": "Schedule Trigger"
+        },
+        {
+            "parameters": {
+                "url": "https://remotive.com/api/remote-jobs?category=software-dev&search=python+AI+automation&limit=100",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 400],
+            "id": "c5d9faeb-28ea-41d2-9b52-ec3b7096cc75",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "url": "https://arbeitnow.com/api/job-board-api?tags=python,javascript,react&visa_sponsorship=1",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 256],
+            "id": "41b6a945-4772-4bad-8529-0b254bb94035",
+            "name": "HTTP Request1"
+        },
+        {
+            "parameters": {
+                "numberInputs": 6
+            },
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [832, 464],
+            "id": "d31ed6cb-fa6d-4790-a70f-3ae04cb8b388",
+            "name": "Merge"
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all();\nconst seen = new Set();\nconst jobs = [];\n\nfor (const item of items) {\n  let newJobs = [];\n\n  if (item.json.jobs) {\n    newJobs = item.json.jobs.map(j => ({\n      id: String(j.id),\n      title: j.title,\n      company: j.company_name,\n      location: j.candidate_required_location || 'Remote',\n      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500) || '',\n      url: j.url,\n      salary: j.salary || ''\n    }));\n  }\n\n  if (item.json.data) {\n    newJobs = item.json.data.map(j => ({\n      id: String(j.slug),\n      title: j.title,\n      company: j.company_name,\n      location: j.location || 'Europe',\n      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500) || '',\n      url: j.url,\n      salary: ''\n    }));\n  }\n\n  if (item.json.results) {\n    newJobs = item.json.results.map(j => ({\n      id: String(j.id),\n      title: j.title,\n      company: j.company?.display_name || '',\n      location: j.location?.display_name || '',\n      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500) || '',\n      url: j.redirect_url,\n      salary: j.salary_min ? `${j.salary_min} - ${j.salary_max}` : ''\n    }));\n  }\n\n  for (const job of newJobs) {\n    if (!seen.has(job.id)) {\n      seen.add(job.id);\n      jobs.push(job);\n    }\n  }\n}\n\nreturn [{ json: { jobs } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [1024, 528],
+            "id": "f36084d9-8f94-4909-8e48-6350578a7a0b",
+            "name": "Normalize Jobs"
+        },
+        {
+            "parameters": {
+                "url": "https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=0c6e2ac7&app_key=caa63bd3c9c3a23696bc0164ba9b2ba1&results_per_page=50&category=it-jobs&what=software+engineer&sort_by=date&content-type=application/json",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 544],
+            "id": "4fcc0c90-4cbd-4eb9-a1c5-cc626fec3011",
+            "name": "HTTP Request2"
+        },
+        {
+            "parameters": {
+                "url": "https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=0c6e2ac7&app_key=caa63bd3c9c3a23696bc0164ba9b2ba1&results_per_page=50&category=it-jobs&what=AI&sort_by=date&content-type=application/json",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 704],
+            "id": "52152db8-08f3-4790-93ce-ff8400f0c4e2",
+            "name": "HTTP Request3"
+        },
+        {
+            "parameters": {
+                "url": "https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=0c6e2ac7&app_key=caa63bd3c9c3a23696bc0164ba9b2ba1&results_per_page=50&category=it-jobs&what=AI&sort_by=date&content-type=application/json",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 864],
+            "id": "64dbbb83-ed19-44e6-b5c3-da386e319876",
+            "name": "HTTP Request4"
+        },
+        {
+            "parameters": {
+                "url": "https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=0c6e2ac7&app_key=caa63bd3c9c3a23696bc0164ba9b2ba1&results_per_page=50&category=it-jobs&what=software+engineer&sort_by=date&content-type=application/json",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [432, 1008],
+            "id": "1e5d6c3a-b96d-412f-89b8-9ffb9f1494a0",
+            "name": "HTTP Request5"
+        },
+        {
+            "parameters": {
+                "fromEmail": "drumond.matheusc@gmail.com",
+                "toEmail": "drumond.matheusc@gmail.com",
+                "subject": "=\ud83d\udd25 Top Jobs of the Week | {{ $now.format('MM/dd/yyyy') }}",
+                "html": "=<!DOCTYPE html>\n<html>\n<body style=\"margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n    <tr>\n      <td align=\"center\" style=\"padding:24px 16px;\">\n        <table width=\"620\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n          <tr>\n            <td style=\"background:#2c3e50;border-radius:8px 8px 0 0;padding:20px 24px;\">\n              <p style=\"margin:0;font-size:20px;font-weight:bold;color:#ffffff;\">\ud83d\udd25 Top Jobs of the Week</p>\n              <p style=\"margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.6);\">{{ $now.format('MM/dd/yyyy') }} \u2014 AI-curated based on your profile</p>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"padding:16px 0;\">{{ $json.html }}</td>\n          </tr>\n          <tr>\n            <td style=\"padding:16px 24px;text-align:center;border-top:1px solid #e0e0e0;\">\n              <p style=\"margin:0;font-size:12px;color:#aaaaaa;\">Automatically generated by your job finder \ud83e\udd16</p>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [1792, 528],
+            "id": "add12a01-dcfd-4cd5-aa34-be8366a88377",
+            "name": "Send an Email",
+            "webhookId": "d36fffb1-fe06-4176-9ef5-b4b93dbc135d",
+            "credentials": {
+                "smtp": {
+                    "id": "NI6dqlVOz0PdEfIO",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const raw = $input.first().json.content.parts[0].text\n  .replace(/```json\\n?/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nconst jobs = JSON.parse(raw);\n\nif (jobs.length === 0) {\n  throw new Error('No jobs found.');\n}\n\nconst scoreColor = (score) => {\n  if (score >= 80) return '#27ae60';\n  if (score >= 60) return '#f39c12';\n  return '#e74c3c';\n};\n\nconst cards = jobs.map((job, i) => {\n  const color = scoreColor(job.match_score);\n  const salary = job.salary\n    ? `<p style=\"margin:4px 0 8px;font-size:13px;color:#27ae60;font-weight:bold;\">&#x1F4B0; ${job.salary}</p>`\n    : '';\n  return `\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-bottom:12px;\">\n  <tr>\n    <td style=\"background:#ffffff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;font-family:Arial,sans-serif;\">\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-bottom:10px;\">\n        <tr>\n          <td style=\"width:30px;vertical-align:middle;\">\n            <span style=\"background:#2c3e50;color:#ffffff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:11px;font-weight:bold;\">${i + 1}</span>\n          </td>\n          <td style=\"vertical-align:middle;padding-left:8px;\">\n            <strong style=\"font-size:15px;color:#2c3e50;\">${job.title}</strong>\n          </td>\n          <td style=\"vertical-align:middle;text-align:right;\">\n            <span style=\"background:#3498db;color:#ffffff;padding:3px 10px;border-radius:12px;font-size:11px;\">${job.category}</span>\n          </td>\n        </tr>\n      </table>\n      <p style=\"margin:0 0 4px;color:#666666;font-size:13px;\">&#x1F3E2; <strong>${job.company}</strong> &nbsp;|&nbsp; &#x1F4CD; ${job.location}</p>\n      ${salary}\n      <p style=\"margin:8px 0 10px;font-size:13px;color:#444444;line-height:1.6;\">${job.why}</p>\n      <p style=\"margin:0 0 4px;font-size:11px;color:#999999;\">Match: <strong style=\"color:${color};\">${job.match_score}%</strong></p>\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-bottom:14px;\">\n        <tr>\n          <td style=\"background:#f0f0f0;border-radius:4px;height:6px;\">\n            <table width=\"${job.match_score}%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"background:${color};border-radius:4px;height:6px;font-size:0;line-height:0;\">&nbsp;</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      </table>\n      <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        <tr>\n          <td style=\"background:#3498db;border-radius:6px;padding:9px 18px;\">\n            <a href=\"${job.url}\" style=\"color:#ffffff;font-size:13px;font-weight:bold;text-decoration:none;\">View job &rarr;</a>\n          </td>\n        </tr>\n      </table>\n    </td>\n  </tr>\n</table>`;\n}).join('');\n\nreturn [{ json: { html: cards } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [1568, 528],
+            "id": "7b9579eb-3142-461b-8711-fbdd266791e7",
+            "name": "Generate Email HTML"
+        },
+        {
+            "parameters": {
+                "modelId": {
+                    "__rl": true,
+                    "value": "models/gemini-2.5-flash",
+                    "mode": "list",
+                    "cachedResultName": "models/gemini-2.5-flash"
+                },
+                "messages": {
+                    "values": [
+                        {
+                            "content": "=You are a job filtering assistant. Analyze the following job listings and return the TOP 50 most relevant for this candidate profile:\n\nSkills: Python, FastAPI, JavaScript, React, Docker, GCP, Gemini AI, ChromaDB, RAG, n8n, REST APIs\nLevel: mid-level software developer / AI automation engineer\nGoal: remote work paying in USD or EUR\nPreferred: AI, automation, backend, fullstack roles\nEXCLUDE: roles with titles containing \"Senior\", \"Lead\", \"Head\", \"Staff\", \"Director\", \"Manager\", \"Architect\"\n\nReturn ONLY a valid JSON array, no extra text, no markdown, no backticks:\n[\n{\n\"title\": \"Job Title\",\n\"company\": \"Company Name\",\n\"location\": \"Location or timezone\",\n\"category\": \"AI / Backend / Fullstack / Automation\",\n\"why\": \"One sentence explaining why it matches the profile.\",\n\"salary\": \"Salary range or empty string if not available\",\n\"match_score\": 85,\n\"url\": \"https://...\"\n}\n]\nmatch_score is a number from 0 to 100 representing how well the job matches the candidate profile.\nJob listings:\n{{ $json.jobs.toJsonString() }}"
+                        }
+                    ]
+                },
+                "builtInTools": {},
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.googleGemini",
+            "typeVersion": 1.1,
+            "position": [1216, 528],
+            "id": "274a290d-276d-4b27-b0d0-5a3f5c48895e",
+            "name": "Message a model1",
+            "retryOnFail": true,
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "2dZjkmRYAdor5iYj",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request1",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTTP Request2",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTTP Request3",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTTP Request4",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "HTTP Request5",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "HTTP Request1": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize Jobs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request2": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "HTTP Request3": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 3
+                    }
+                ]
+            ]
+        },
+        "HTTP Request4": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 4
+                    }
+                ]
+            ]
+        },
+        "HTTP Request5": {
+            "main": [
+                [
+                    {
+                        "node": "Merge",
+                        "type": "main",
+                        "index": 5
+                    }
+                ]
+            ]
+        },
+        "Generate Email HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Send an Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize Jobs": {
+            "main": [
+                [
+                    {
+                        "node": "Message a model1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Message a model1": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Email HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "versionId": "eb232259-692a-48d1-abb0-1b702d36a2e1",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "7251fee21b62d3b123ed00061688516c6afa930ee10e9fc85e59d7a6fcf78790"
+    },
+    "id": "5u3w3jgXa2NeezlG",
+    "tags": []
+}
